@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello Amaze UI</title>
+    <!-- Set render engine for 360 browser -->
+    <meta name="renderer" content="webkit">
+    <!-- No Baidu Siteapp-->
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@1.0.0/lib/theme-default/index.css">
+</head>
+
+<body>
+    <div id="app">
+        <el-row>
+            <el-col :span="20">
+                <el-input placeholder="请输入城市" v-model="city">
+                </el-input>
+            </el-col>
+            <el-col :span="4">
+                <el-button :plain="true" @click="searchClickEvent()" v-loading.fullscreen.lock="isLoading">查询</el-button>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="24">
+                <el-table :data="tableData">
+                    <el-table-column prop="date" label="日期" width="70">
+                    </el-table-column>
+                    <el-table-column prop="info" label="详情">
+                    </el-table-column>
+                </el-table>
+            </el-col>
+        </el-row>
+    </div>
+</body>
+<!-- 先引入 Vue -->
+<script src="https://unpkg.com/vue@2.0.5/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/vue-resource/1.0.3/vue-resource.min.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui@1.0.0/lib/index.js"></script>
+<script>
+new Vue({
+    el: '#app',
+    data: function() {
+        return {
+            city: '无锡',
+            isLoading: false,
+            tableData: []
+        }
+    },
+    methods: {
+        searchClickEvent: function() {
+            this.isLoading = true;
+
+            this.$http.get('http://apis.baidu.com/showapi_open_bus/weather_showapi/address', {
+                headers: {
+                    'apikey': 'b9879e5e82c630b8de50e26b1759db30'
+                },
+                params: {
+                    'area': this.city
+                }
+            }).then(function(response) {
+                console.log(response);
+
+                try {
+                    var data = response.body.showapi_res_body;
+
+                    this.tableData = [];
+
+                    this.city = data.cityInfo.c3 + '-' + data.cityInfo.c7;
+
+                    this.tableData.push({
+                        'date': '现在',
+                        'info': [
+                            data.now.temperature + '℃',
+                            data.now.weather,
+                            data.now.wind_direction + data.now.wind_power,
+                            data.now.aqiDetail.aqi + '-' + data.now.aqiDetail.quality
+                        ].join('，')
+                    });
+                    this.tableData.push({
+                        'date': '今天',
+                        'info': [
+                            '白天' + data.f1.day_air_temperature + '℃',
+                            data.f1.day_weather,
+                            data.f1.day_wind_direction + data.f1.day_wind_power.split(' ')[0],
+                            '夜间' + data.f1.night_air_temperature + '℃',
+                            data.f1.night_weather,
+                            data.f1.night_wind_direction + data.f1.night_wind_power.split(' ')[0],
+                            '降水概率' + data.f1.jiangshui
+                        ].join('，')
+                    });
+                    this.tableData.push({
+                        'date': '明天',
+                        'info': [
+                            '白天' + data.f2.day_air_temperature + '℃',
+                            data.f2.day_weather,
+                            data.f2.day_wind_direction + data.f2.day_wind_power.split(' ')[0],
+                            '夜间' + data.f2.night_air_temperature + '℃',
+                            data.f2.night_weather,
+                            data.f2.night_wind_direction + data.f2.night_wind_power.split(' ')[0],
+                            '降水概率' + data.f2.jiangshui
+                        ].join('，')
+                    });
+                    this.tableData.push({
+                        'date': '后天',
+                        'info': [
+                            '白天' + data.f3.day_air_temperature + '℃',
+                            data.f3.day_weather,
+                            data.f3.day_wind_direction + data.f3.day_wind_power.split(' ')[0],
+                            '夜间' + data.f3.night_air_temperature + '℃',
+                            data.f3.night_weather,
+                            data.f3.night_wind_direction + data.f3.night_wind_power.split(' ')[0],
+                            '降水概率' + data.f3.jiangshui
+                        ].join('，')
+                    });
+                } catch (e) {}
+
+                this.isLoading = false;
+            });
+        }
+    }
+});
+</script>
+
+</html>
